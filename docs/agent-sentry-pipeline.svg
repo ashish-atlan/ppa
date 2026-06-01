@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah-purple" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#8b5cf6"/></marker>
+    <marker id="ah-blue" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#4a9eed"/></marker>
+    <marker id="ah-teal" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0c8599"/></marker>
+    <marker id="ah-green" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#22c55e"/></marker>
+    <marker id="ah-gray" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#868e96"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1180" height="760" fill="#ffffff"/>
+  <text x="590" y="34" text-anchor="middle" font-size="26" font-weight="bold" fill="#1e1e1e">agent-sentry pipeline</text>
+
+  <!-- triggers -->
+  <rect x="40" y="110" width="180" height="48" rx="10" fill="#ffe8cc" stroke="#e8590c" stroke-width="2"/>
+  <text x="130" y="139" text-anchor="middle" font-size="15" fill="#1e1e1e">CLI — prompt / --skill</text>
+  <rect x="40" y="176" width="180" height="48" rx="10" fill="#ffe8cc" stroke="#e8590c" stroke-width="2"/>
+  <text x="130" y="205" text-anchor="middle" font-size="15" fill="#1e1e1e">cron (--skill)</text>
+  <rect x="40" y="242" width="180" height="48" rx="10" fill="#ffe8cc" stroke="#e8590c" stroke-width="2"/>
+  <text x="130" y="271" text-anchor="middle" font-size="15" fill="#1e1e1e">HTTP API / UI tab</text>
+
+  <!-- agent -->
+  <rect x="300" y="150" width="250" height="110" rx="12" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="425" y="196" text-anchor="middle" font-size="21" font-weight="bold" fill="#1e1e1e">agent-sentry</text>
+  <text x="425" y="222" text-anchor="middle" font-size="15" fill="#1e1e1e">run_briefing()</text>
+
+  <line x1="220" y1="134" x2="300" y2="190" stroke="#868e96" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="220" y1="200" x2="300" y2="205" stroke="#868e96" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="220" y1="266" x2="300" y2="220" stroke="#868e96" stroke-width="2" marker-end="url(#ah-gray)"/>
+
+  <!-- ppa graph + profile (context source of truth) -->
+  <rect x="650" y="64" width="210" height="80" rx="12" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+  <text x="755" y="98" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e1e1e">Graphiti</text>
+  <text x="755" y="121" text-anchor="middle" font-size="15" fill="#1e1e1e">group = ppa</text>
+  <rect x="900" y="74" width="234" height="60" rx="10" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
+  <text x="1017" y="100" text-anchor="middle" font-size="14" fill="#1e1e1e">memory/user-profile.md</text>
+  <text x="1017" y="120" text-anchor="middle" font-size="12" fill="#495057">(canonical snapshot)</text>
+  <line x1="900" y1="104" x2="862" y2="104" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <line x1="650" y1="120" x2="552" y2="180" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <text x="600" y="150" text-anchor="middle" font-size="13" fill="#0c8599">Step 0: load ppa context</text>
+
+  <!-- skill selection -->
+  <rect x="300" y="320" width="250" height="64" rx="12" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/>
+  <text x="425" y="347" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e1e1e">SDK auto-selects skill</text>
+  <text x="425" y="368" text-anchor="middle" font-size="12.5" fill="#495057">all .claude/skills loaded — no router</text>
+  <line x1="425" y1="260" x2="425" y2="320" stroke="#4a9eed" stroke-width="2" marker-end="url(#ah-blue)"/>
+  <text x="468" y="294" text-anchor="middle" font-size="13" fill="#4a9eed">prompt</text>
+
+  <!-- chosen skill -->
+  <rect x="300" y="430" width="250" height="64" rx="12" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/>
+  <text x="425" y="457" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e1e1e">daily-priority-brief</text>
+  <text x="425" y="478" text-anchor="middle" font-size="12.5" fill="#495057">Eisenhower matrix · Top-3</text>
+  <line x1="425" y1="384" x2="425" y2="430" stroke="#4a9eed" stroke-width="2" marker-end="url(#ah-blue)"/>
+
+  <!-- briefing file -->
+  <rect x="300" y="540" width="250" height="56" rx="10" fill="#b2f2bb" stroke="#22c55e" stroke-width="2"/>
+  <text x="425" y="573" text-anchor="middle" font-size="14" fill="#1e1e1e">briefings/&lt;name&gt;-&lt;ts&gt;.md</text>
+  <line x1="425" y1="494" x2="425" y2="540" stroke="#22c55e" stroke-width="2" marker-end="url(#ah-green)"/>
+  <text x="460" y="522" text-anchor="middle" font-size="13" fill="#22c55e">Write</text>
+
+  <!-- relay fan-out -->
+  <rect x="650" y="468" width="220" height="48" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+  <text x="760" y="497" text-anchor="middle" font-size="14" fill="#1e1e1e">Slack DM → self (email)</text>
+  <rect x="650" y="528" width="220" height="48" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+  <text x="760" y="557" text-anchor="middle" font-size="14" fill="#1e1e1e">Email → recipients</text>
+  <rect x="650" y="588" width="220" height="48" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+  <text x="760" y="617" text-anchor="middle" font-size="14" fill="#1e1e1e">UI right pane</text>
+  <line x1="550" y1="566" x2="650" y2="492" stroke="#f08c00" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="550" y1="568" x2="650" y2="552" stroke="#f08c00" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="550" y1="572" x2="650" y2="612" stroke="#f08c00" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="610" y="640" text-anchor="middle" font-size="13" fill="#f08c00">relay (per skill frontmatter)</text>
+
+  <!-- graphiti lock back -->
+  <path d="M540,545 C760,470 800,300 815,146" fill="none" stroke="#0c8599" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah-teal)"/>
+  <text x="905" y="300" text-anchor="middle" font-size="13" fill="#0c8599">lock_to_graphiti → ppa episode</text>
+
+  <!-- note -->
+  <rect x="40" y="676" width="1100" height="56" rx="8" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="590" y="700" text-anchor="middle" font-size="13.5" fill="#1e1e1e">.mcp.json = single source of MCP servers · setting_sources=project auto-loads it</text>
+  <text x="590" y="720" text-anchor="middle" font-size="13.5" fill="#1e1e1e">allowed_tools scopes agent-sentry to graphiti + slack + email — Glean/Granola NOT wired (the ppa graph is the source of truth)</text>
+</svg>

@@ -3,3 +3,10 @@ __pycache__/
 .venv/
 *.egg-info/
 .DS_Store
+
+# Runtime digest outputs (contain meeting/personal content).
+memory/*.md
+
+# Runtime briefing outputs (agent-sentry; may contain personal/internal content).
+briefings/*.md
+briefings/cron.log

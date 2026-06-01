@@ -1,0 +1,15 @@
+# agent-sentry — example crontab entries.
+#
+# Install with:  crontab crontab.example   (or paste a line into `crontab -e`).
+# Prefer --skill for cron: it is deterministic (no prompt-based skill auto-selection),
+# and the run is fully non-interactive (no TTY prompts — the agent's allowed_tools cover
+# every tool it needs). stdout/stderr are appended to a log so failures are inspectable.
+#
+# NOTE: cron runs with a minimal environment. Use absolute paths and the repo's venv python.
+# The script loads the repo .env itself, so secrets need not be exported here.
+
+# Daily priority brief at 08:00 local time (DMs the user via Slack + locks into ppa).
+0 8 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill daily-priority-brief >> briefings/cron.log 2>&1
+
+# Same brief on Monday with a wider lookback window (last 72h over the weekend).
+30 7 * * 1  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill daily-priority-brief --timeframe-hours 72 >> briefings/cron.log 2>&1

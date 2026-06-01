@@ -10,6 +10,16 @@
       "command": "/Users/ashish.desai/.config/claude-mcp/granola-launcher.sh",
       "args": []
     },
+    "slack": {
+      "type": "stdio",
+      "command": "/Users/ashish.desai/.config/claude-mcp/slack-launcher.sh",
+      "args": []
+    },
+    "email": {
+      "type": "stdio",
+      "command": "/Users/ashish.desai/.config/claude-mcp/email-launcher.sh",
+      "args": []
+    },
     "glean": {
       "type": "http",
       "url": "${GLEAN_MCP_URL}/mcp/default",

@@ -41,35 +41,12 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
     )
 
 
-# Graphiti MCP server: stdio launcher living outside ~/Desktop (dodges the macOS
-# TCC exec gate) that self-loads grafiti/.env and runs the server. The dict key
-# `graphiti` sets the tool prefix -> `mcp__graphiti__<tool>`.
-GRAPHITI_LAUNCHER = "/Users/ashish.desai/.config/claude-mcp/graphiti-launcher.sh"
-
-# First-party Granola MCP server (stdio launcher, same pattern as graphiti). Glean
-# does NOT index Granola for this user, so the granola source is reached here — a thin
-# wrapper over Granola's public API (src/granola_mcp_server.py) — instead of via Glean.
-# The dict key `granola` sets the tool prefix -> `mcp__granola__<tool>`.
-GRANOLA_LAUNCHER = "/Users/ashish.desai/.config/claude-mcp/granola-launcher.sh"
-
-mcp_servers = {
-    "graphiti": {"type": "stdio", "command": GRAPHITI_LAUNCHER, "args": []},
-    "granola": {"type": "stdio", "command": GRANOLA_LAUNCHER, "args": []},
-}
-
-# Glean MCP server (streamable-HTTP transport). Bearer token + host come from the
-# project .env loaded above. GLEAN_MCP_URL holds only the host, so append the MCP
-# endpoint path. Required for this pipeline — every source is reached via Glean.
-glean_url = os.environ.get("GLEAN_MCP_URL")
-glean_token = os.environ.get("GLEAN_MCP_AUTH_TOKEN")
-if glean_url and glean_token:
-    glean_endpoint = glean_url.rstrip("/") + "/mcp/default"
-    mcp_servers["glean"] = {
-        "type": "http",
-        "url": glean_endpoint,
-        "headers": {"Authorization": f"Bearer {glean_token}"},
-    }
-else:
+# MCP servers (graphiti, granola, glean) are NOT defined here: the project .mcp.json is the
+# single source of server definitions. The SDK auto-loads it because we pass `skills=[...]`
+# (which defaults `setting_sources` to include `project`) and leave `strict_mcp_config`
+# False. We only fail-fast on the Glean env the pipeline truly needs; .mcp.json interpolates
+# GLEAN_MCP_URL / GLEAN_MCP_AUTH_TOKEN via ${...}, and allowed_tools (below) scopes usage.
+if not (os.environ.get("GLEAN_MCP_URL") and os.environ.get("GLEAN_MCP_AUTH_TOKEN")):
     raise SystemExit(
         "GLEAN_MCP_URL and GLEAN_MCP_AUTH_TOKEN must be set in .env — the digest "
         "pipeline reaches every source only through the Glean MCP server."
@@ -213,8 +190,9 @@ profile_curator = AgentDefinition(
 # Thin: it does not gather sources itself. It delegates one Task per source IN PARALLEL,
 # ingests the resulting files into Graphiti (group ppa), then delegates to the
 # profile-curator. `skills=[...]` defaults setting_sources to ["user", "project"], which
-# discovers skills at <cwd>/.claude/skills/<name>/SKILL.md — so cwd is pinned to the repo
-# root. allowed_tools auto-approves the listed tools (no prompt).
+# discovers skills at <cwd>/.claude/skills/<name>/SKILL.md AND loads the project .mcp.json
+# (graphiti/granola/glean) — so cwd is pinned to the repo root and no mcp_servers dict is
+# needed here. allowed_tools auto-approves the listed tools (no prompt).
 options = ClaudeAgentOptions(
     system_prompt=(
         "You are a digest orchestrator. Do NOT gather any source data yourself. "
@@ -231,7 +209,6 @@ options = ClaudeAgentOptions(
     model="claude-sonnet-4-6",  # must match a model_name in the LiteLLM config
     max_turns=40,
     skills=["source-digest", "user-profile"],
-    mcp_servers=mcp_servers,
     agents={**source_agents, "profile-curator": profile_curator},
     # Approval is session-global: a subagent's AgentDefinition.tools only scopes its
     # *visibility*, it does NOT auto-approve. So allowed_tools must be the UNION of

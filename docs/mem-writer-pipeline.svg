@@ -26,20 +26,27 @@
   <line x1="540" y1="149" x2="588" y2="205" stroke="#8b5cf6" stroke-width="3" marker-end="url(#ah-purple)"/>
   <text x="640" y="180" text-anchor="middle" font-size="16" fill="#5b3fb8">Task x6 — parallel</text>
 
-  <!-- Glean access layer -->
-  <line x1="105"  y1="284" x2="358" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <line x1="300"  y1="284" x2="458" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <line x1="495"  y1="284" x2="558" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <line x1="690"  y1="284" x2="660" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <line x1="885"  y1="284" x2="760" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <line x1="1080" y1="284" x2="860" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
-  <text x="555" y="312" text-anchor="middle" font-size="13" fill="#2563eb">via Glean only</text>
-  <rect x="300" y="330" width="580" height="64" rx="10" fill="#ffd8a8" stroke="#f59e0b" stroke-width="2"/>
-  <text x="590" y="367" text-anchor="middle" font-size="17" fill="#1e1e1e">Glean MCP   (app:&lt;source&gt;, last 24h, user-relevant)</text>
+  <!-- Glean access layer (5 sources) -->
+  <line x1="105"  y1="284" x2="220" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="300"  y1="284" x2="320" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="495"  y1="284" x2="430" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="885"  y1="284" x2="540" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="1080" y1="284" x2="640" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <rect x="120" y="330" width="600" height="64" rx="10" fill="#ffd8a8" stroke="#f59e0b" stroke-width="2"/>
+  <text x="420" y="360" text-anchor="middle" font-size="16" fill="#1e1e1e">Glean MCP   (app:&lt;source&gt;, last 24h, user-relevant)</text>
+  <text x="420" y="382" text-anchor="middle" font-size="13" fill="#b45309">slack · gmail · gong · linear · gcal</text>
+
+  <!-- Granola access layer (first-party, NOT Glean) -->
+  <line x1="690" y1="284" x2="900" y2="328" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <text x="838" y="306" text-anchor="middle" font-size="12" fill="#0c6b80">not Glean</text>
+  <rect x="760" y="330" width="360" height="64" rx="10" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
+  <text x="940" y="360" text-anchor="middle" font-size="16" fill="#1e1e1e">Granola MCP  (first-party)</text>
+  <text x="940" y="382" text-anchor="middle" font-size="13" fill="#0c6b80">list_notes → get_note, last 24h, attended</text>
 
   <!-- memory files -->
-  <line x1="590" y1="394" x2="590" y2="448" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
-  <text x="668" y="425" text-anchor="middle" font-size="15" fill="#0c6b80">subagent Write</text>
+  <line x1="420" y1="394" x2="540" y2="448" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <line x1="940" y1="394" x2="820" y2="448" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <text x="700" y="425" text-anchor="middle" font-size="15" fill="#0c6b80">subagent Write</text>
   <rect x="300" y="450" width="580" height="70" rx="10" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
   <text x="590" y="491" text-anchor="middle" font-size="18" fill="#1e1e1e">memory/&lt;source&gt;-&lt;timestamp&gt;.md   (6 files)</text>
 

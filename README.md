@@ -101,10 +101,12 @@ other agents that process user responses can reuse it, not just mem-writer.
 | `granola` | stdio launcher (`~/.config/claude-mcp/granola-launcher.sh`) → `src/granola_mcp_server.py` (FastMCP over Granola's public API) | `mcp__granola__*` |
 | `glean` | HTTP, `${GLEAN_MCP_URL}/mcp/default` + bearer token | `mcp__glean__*` |
 
-Wiring lives both **in code** (`src/mem-writer.py`, for the SDK agent) and in
-[`.mcp.json`](.mcp.json) (for headless `claude -p`, see below). Keys (`graphiti`, `granola`,
-`glean`) match in both, so tool names resolve identically. The `granola` launcher loads the
-repo `.env` (for `GRANOLA_API_KEY`) and runs the first-party server on the repo `.venv`.
+Server definitions live in **one place** — [`.mcp.json`](.mcp.json). The SDK agent loads it
+automatically (passing `skills=[...]` enables the `project` setting source; `strict_mcp_config`
+is left False), and headless `claude -p` reads it too — so no server dict is hard-coded in
+`src/mem-writer.py`. `mem-writer` still fail-fasts if the Glean env vars are missing. The
+`granola` launcher loads the repo `.env` (for `GRANOLA_API_KEY`) and runs the first-party
+server on the repo `.venv`.
 
 ## Setup
 
@@ -164,3 +166,128 @@ memory/                                 digest outputs + user-profile.md (runtim
 docs/mem-writer-pipeline.svg            pipeline diagram (embedded above)
 docs/mem-writer-pipeline.excalidraw.json  editable diagram source
 ```
+
+---
+
+# agent-sentry — generic briefing agent
+
+`src/agent-sentry.py` is the **generic** sibling of mem-writer. Where mem-writer *produces*
+the `ppa` Graphiti graph, agent-sentry *consumes* it. It:
+
+1. **loads context** from Graphiti group `ppa` (the user profile + relevant facts/episodes
+   mem-writer wrote) as the input for the run,
+2. **auto-selects a skill** — every skill in `.claude/skills/` is loaded into the agent and
+   the Claude Agent SDK picks the one matching the prompt (no routing code),
+3. runs the skill and writes a **briefing** to `briefings/<briefing-name>-<UTC-ts>.md`,
+4. **relays** the briefing wherever the *skill's frontmatter* says (Slack / email / UI),
+5. optionally **locks** the briefing back into Graphiti.
+
+It runs three ways — interactive CLI, unattended cron, and an HTTP API for a (later-phase)
+tabbed UI. Shared engine: [`src/sentry_core.py`](src/sentry_core.py) (`run_briefing`).
+
+## Pipeline
+
+![agent-sentry pipeline](docs/agent-sentry-pipeline.svg)
+
+> Editable source: [`docs/agent-sentry-pipeline.excalidraw.json`](docs/agent-sentry-pipeline.excalidraw.json)
+> (open at [excalidraw.com](https://excalidraw.com) → Menu → Open).
+
+<details>
+<summary>Text fallback (mermaid)</summary>
+
+```mermaid
+flowchart TD
+  trig["CLI · cron · API/UI"] -->|prompt / --skill| ag["agent-sentry<br>run_briefing()"]
+  ppa[("Graphiti<br>group: ppa")] -->|"Step 0: load context"| ag
+  prof["memory/user-profile.md"] --> ppa
+  ag -->|prompt| sel["SDK auto-selects skill<br>(all skills loaded — no router)"]
+  sel --> sk["daily-priority-brief<br>Eisenhower matrix"]
+  sk -->|Write| bf["briefings/&lt;name&gt;-&lt;ts&gt;.md"]
+  bf -->|relay per frontmatter| slack["Slack DM → self (email)"]
+  bf --> email["Email → recipients"]
+  bf --> ui["UI right pane"]
+  bf -.->|lock_to_graphiti| ppa
+```
+</details>
+
+MCP servers are defined once in [`.mcp.json`](.mcp.json) (the SDK auto-loads it via the
+`project` setting source); `allowed_tools` scopes agent-sentry to **graphiti + slack + email**.
+Glean/Granola are deliberately **not** wired in — mem-writer already harvested them into the
+`ppa` graph, which agent-sentry treats as the source of truth.
+
+## Skill frontmatter (the unit of configuration)
+
+Drop a `SKILL.md` in `.claude/skills/`; agent-sentry runs it with no code change. Beyond the
+SDK's `name`/`description`, add a `briefing:` block — agent-sentry parses it directly:
+
+```yaml
+---
+name: daily-priority-brief
+description: <when to trigger this skill ...>   # also the UI tab label + auto-select signal
+briefing:
+  name: daily-priority-brief         # output filename stem (defaults to the skill name)
+  relay: [slack, email, ui]          # zero or more of: slack | email | ui
+  slack_channel: "self"              # required if 'slack' in relay — see below
+  email_to: ["leadership@atlan.com"] # required if 'email' in relay; "self" also allowed
+  lock_to_graphiti: true             # persist the briefing into Graphiti (default false)
+  graphiti_group: ppa                # optional, default "ppa"
+---
+```
+
+A declared relay with no target (`slack` without `slack_channel`, `email` without `email_to`)
+fails fast at startup. Relay destinations come **only** from frontmatter — never the prompt —
+so a request can't redirect a briefing elsewhere.
+
+**`self` sentinel** — a `slack_channel` / `email_to` of `self` (or `@me`) resolves at runtime
+to the configured user (`SENTRY_USER_EMAIL`, falling back to `DIGEST_USER_EMAIL` from `.env`),
+so skills stay identity-agnostic. For Slack, the [first-party Slack MCP](src/slack_mcp_server.py)
+turns that email into a **direct message** to the user (`users.lookupByEmail` → `conversations.open`).
+The shipped [`daily-priority-brief`](.claude/skills/daily-priority-brief/SKILL.md) skill uses
+`relay: [ui, slack]` with `slack_channel: self` — it DMs the user a daily Eisenhower-matrix brief.
+
+## CLI / cron
+
+```bash
+# Interactive — skill auto-selected from the prompt:
+.venv/bin/python src/agent-sentry.py --prompt "what should I focus on today?"
+
+# Deterministic (preferred for cron) — name the skill, machine output:
+.venv/bin/python src/agent-sentry.py --skill daily-priority-brief --json
+
+# Testing — write the briefing but skip relay + Graphiti:
+.venv/bin/python src/agent-sentry.py --skill daily-priority-brief --dry-run
+```
+
+Cron: see [`crontab.example`](crontab.example) (`crontab crontab.example`). Runs are
+non-interactive; exit code is non-zero on failure so cron can alert.
+
+## HTTP API (for the UI)
+
+```bash
+.venv/bin/python src/sentry_api.py        # binds 127.0.0.1:8787
+# or: uvicorn src.sentry_api:app --host 127.0.0.1 --port 8787
+```
+
+| endpoint | purpose |
+|---|---|
+| `GET /skills` | one entry per skill → the UI builds **one tab per skill** |
+| `POST /run` | body `{skill, prompt?, timeframe_hours?}` → `{skill, briefing_path, content, relayed[], graphiti_locked}`; `content` is the markdown the **right pane** renders |
+
+Auth: every request needs `X-API-Key: $SENTRY_API_KEY`. Unknown skill → 404; over the
+per-key rate limit → 429. Bound to localhost; a public deployment needs a security review
+(`#bu-security-and-it`) first.
+
+## Relay MCP servers
+
+| server | transport | tools | env |
+|---|---|---|---|
+| `slack` | stdio launcher → [`src/slack_mcp_server.py`](src/slack_mcp_server.py) (FastMCP over Slack `chat.postMessage`) | `mcp__slack__send_message` | `SLACK_BOT_TOKEN` (scope `chat:write`) |
+| `email` | stdio launcher → [`src/email_mcp_server.py`](src/email_mcp_server.py) (FastMCP over SMTP + STARTTLS) | `mcp__email__send` | `SMTP_HOST/PORT/USER/PASS/FROM` |
+
+Both are first-party (no third-party MCP packages) and defined in [`.mcp.json`](.mcp.json)
+alongside graphiti/granola/glean — the single source of server definitions for both agents.
+agent-sentry does **not** hard-code servers; it is scoped purely by `allowed_tools` to
+graphiti + slack + email. Glean/Granola are defined in the project but intentionally **not**
+wired into agent-sentry — the `ppa` graph (which mem-writer populates from them) is the
+source of truth. A relay server whose env (token / SMTP creds) is absent simply fails to
+start and its tool is unavailable at call time.
