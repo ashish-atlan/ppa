@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah-purple" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#8b5cf6"/></marker>
+    <marker id="ah-blue" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#4a9eed"/></marker>
+    <marker id="ah-teal" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0c8599"/></marker>
+    <marker id="ah-green" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#22c55e"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1180" height="820" fill="#ffffff"/>
+  <text x="590" y="32" text-anchor="middle" font-size="26" font-weight="bold" fill="#1e1e1e">mem-writer pipeline</text>
+
+  <!-- main + orchestrator -->
+  <rect x="60" y="80" width="170" height="64" rx="10" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="145" y="118" text-anchor="middle" font-size="20" fill="#1e1e1e">main()</text>
+  <rect x="380" y="75" width="300" height="74" rx="10" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="530" y="118" text-anchor="middle" font-size="22" fill="#1e1e1e">Orchestrator agent</text>
+  <line x1="230" y1="112" x2="373" y2="112" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ah-purple)"/>
+  <text x="300" y="104" text-anchor="middle" font-size="16" fill="#5b3fb8">query</text>
+
+  <!-- six source subagents -->
+  <rect x="20"  y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="105"  y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">slack-digest</text>
+  <rect x="215" y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="300"  y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">gmail-digest</text>
+  <rect x="410" y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="495"  y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">gong-digest</text>
+  <rect x="605" y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="690"  y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">granola-digest</text>
+  <rect x="800" y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="885"  y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">linear-digest</text>
+  <rect x="995" y="210" width="170" height="74" rx="10" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/><text x="1080" y="252" text-anchor="middle" font-size="18" fill="#1e1e1e">gcal-digest</text>
+  <line x1="540" y1="149" x2="588" y2="205" stroke="#8b5cf6" stroke-width="3" marker-end="url(#ah-purple)"/>
+  <text x="640" y="180" text-anchor="middle" font-size="16" fill="#5b3fb8">Task x6 — parallel</text>
+
+  <!-- Glean access layer -->
+  <line x1="105"  y1="284" x2="358" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="300"  y1="284" x2="458" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="495"  y1="284" x2="558" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="690"  y1="284" x2="660" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="885"  y1="284" x2="760" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <line x1="1080" y1="284" x2="860" y2="328" stroke="#4a9eed" stroke-width="1" marker-end="url(#ah-blue)"/>
+  <text x="555" y="312" text-anchor="middle" font-size="13" fill="#2563eb">via Glean only</text>
+  <rect x="300" y="330" width="580" height="64" rx="10" fill="#ffd8a8" stroke="#f59e0b" stroke-width="2"/>
+  <text x="590" y="367" text-anchor="middle" font-size="17" fill="#1e1e1e">Glean MCP   (app:&lt;source&gt;, last 24h, user-relevant)</text>
+
+  <!-- memory files -->
+  <line x1="590" y1="394" x2="590" y2="448" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <text x="668" y="425" text-anchor="middle" font-size="15" fill="#0c6b80">subagent Write</text>
+  <rect x="300" y="450" width="580" height="70" rx="10" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
+  <text x="590" y="491" text-anchor="middle" font-size="18" fill="#1e1e1e">memory/&lt;source&gt;-&lt;timestamp&gt;.md   (6 files)</text>
+
+  <!-- Graphiti + profile-curator -->
+  <line x1="470" y1="520" x2="362" y2="598" stroke="#22c55e" stroke-width="2" marker-end="url(#ah-green)"/>
+  <text x="350" y="560" text-anchor="middle" font-size="15" fill="#15803d">Read + add_memory</text>
+  <rect x="150" y="600" width="380" height="92" rx="10" fill="#b2f2bb" stroke="#22c55e" stroke-width="2"/>
+  <text x="340" y="640" text-anchor="middle" font-size="18" fill="#1e1e1e">Graphiti  (Neo4j, local)</text>
+  <text x="340" y="666" text-anchor="middle" font-size="18" fill="#15803d">group_id: ppa</text>
+
+  <line x1="710" y1="520" x2="818" y2="598" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ah-purple)"/>
+  <text x="815" y="560" text-anchor="middle" font-size="15" fill="#5b3fb8">Task: digest files</text>
+  <rect x="660" y="600" width="320" height="92" rx="10" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="820" y="640" text-anchor="middle" font-size="18" fill="#1e1e1e">profile-curator</text>
+  <text x="820" y="666" text-anchor="middle" font-size="16" fill="#5b3fb8">(user-profile skill)</text>
+
+  <line x1="660" y1="646" x2="532" y2="646" stroke="#22c55e" stroke-width="2" marker-end="url(#ah-green)"/>
+  <text x="596" y="638" text-anchor="middle" font-size="13" fill="#15803d">add_memory (profile)</text>
+
+  <line x1="820" y1="692" x2="830" y2="738" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-teal)"/>
+  <text x="862" y="718" text-anchor="middle" font-size="15" fill="#0c6b80">Write</text>
+  <rect x="680" y="740" width="300" height="60" rx="10" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
+  <text x="830" y="776" text-anchor="middle" font-size="18" fill="#1e1e1e">memory/user-profile.md</text>
+
+  <text x="150" y="726" font-size="13" fill="#757575">main() sleeps 45s  →  Graphiti queue drains to Neo4j</text>
+</svg>

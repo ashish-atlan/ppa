@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "graphiti": {
+      "type": "stdio",
+      "command": "/Users/ashish.desai/.config/claude-mcp/graphiti-launcher.sh",
+      "args": []
+    },
+    "glean": {
+      "type": "http",
+      "url": "${GLEAN_MCP_URL}/mcp/default",
+      "headers": {
+        "Authorization": "Bearer ${GLEAN_MCP_AUTH_TOKEN}"
+      }
+    }
+  }
+}
