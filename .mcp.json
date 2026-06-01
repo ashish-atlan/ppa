@@ -5,6 +5,11 @@
       "command": "/Users/ashish.desai/.config/claude-mcp/graphiti-launcher.sh",
       "args": []
     },
+    "granola": {
+      "type": "stdio",
+      "command": "/Users/ashish.desai/.config/claude-mcp/granola-launcher.sh",
+      "args": []
+    },
     "glean": {
       "type": "http",
       "url": "${GLEAN_MCP_URL}/mcp/default",

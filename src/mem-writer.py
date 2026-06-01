@@ -1,11 +1,13 @@
 """mem-writer: personal daily digest orchestrator.
 
 A main orchestrator agent fans out to six per-source sub-agents IN PARALLEL — one
-per source system (slack, gmail, gong, granola, linear, google calendar). Every
-source is reached ONLY through the Glean MCP server; each sub-agent scopes its
-Glean queries to its one source (`app:<Source>`) and to the user's relevant
-artifacts in a timeframe (default last 24h), then writes a digest to
-`memory/<source>-<timestamp>.md` via the `source-digest` skill.
+per source system (slack, gmail, gong, granola, linear, google calendar). Five of
+the six are reached through the Glean MCP server; each scopes its Glean queries to
+its one source (`app:<Source>`) and to the user's relevant artifacts in a timeframe
+(default last 24h). Granola is the exception: Glean does NOT index Granola for this
+user, so the granola sub-agent reaches it through the first-party Granola MCP server
+(`mcp__granola__*`, see src/granola_mcp_server.py) instead. Every sub-agent writes a
+digest to `memory/<source>-<timestamp>.md` via the `source-digest` skill.
 
 Once the six files exist the orchestrator ingests each into Graphiti under a single
 group_id `ppa`, then delegates to a `profile-curator` sub-agent that distils durable
@@ -44,8 +46,15 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
 # `graphiti` sets the tool prefix -> `mcp__graphiti__<tool>`.
 GRAPHITI_LAUNCHER = "/Users/ashish.desai/.config/claude-mcp/graphiti-launcher.sh"
 
+# First-party Granola MCP server (stdio launcher, same pattern as graphiti). Glean
+# does NOT index Granola for this user, so the granola source is reached here — a thin
+# wrapper over Granola's public API (src/granola_mcp_server.py) — instead of via Glean.
+# The dict key `granola` sets the tool prefix -> `mcp__granola__<tool>`.
+GRANOLA_LAUNCHER = "/Users/ashish.desai/.config/claude-mcp/granola-launcher.sh"
+
 mcp_servers = {
     "graphiti": {"type": "stdio", "command": GRAPHITI_LAUNCHER, "args": []},
+    "granola": {"type": "stdio", "command": GRANOLA_LAUNCHER, "args": []},
 }
 
 # Glean MCP server (streamable-HTTP transport). Bearer token + host come from the
@@ -88,7 +97,8 @@ DIGEST_USER_EMAIL = os.environ.get("DIGEST_USER_EMAIL", "").strip()
 # shared `source-digest` skill; the per-source rule lives in the skill, the prompt just
 # names this agent's one source. Sub-agents write files; they do NOT touch Graphiti.
 
-# (slug, label, Glean app: filter, user-relevance rule)
+# Glean-backed sources (slug, label, Glean app: filter, user-relevance rule). Granola is
+# NOT here — Glean doesn't index it for this user; it has its own subagent below.
 SOURCES = [
     ("slack", "Slack", "app:Slack",
      "Slack threads where the user is tagged directly or indirectly, or participated."),
@@ -96,8 +106,6 @@ SOURCES = [
      "Gmail messages where the user is in the to, cc, or bcc list."),
     ("gong", "Gong", "app:Gong",
      "Gong calls the user was invited to / attended."),
-    ("granola", "Granola", "app:Granola",
-     "Granola meetings the user was invited to / attended."),
     ("linear", "Linear", "app:Linear",
      "Linear issues assigned to, created by, mentioning, or subscribed-to by the user."),
     ("google-calendar", "Google Calendar", 'app:"Google Calendar"',
@@ -109,6 +117,12 @@ GLEAN_TOOLS = [
     "mcp__glean__read_document",
     "mcp__glean__chat",
     "mcp__glean__meeting_lookup",
+]
+
+# Granola is reached via the first-party Granola MCP server, not Glean.
+GRANOLA_TOOLS = [
+    "mcp__granola__list_notes",
+    "mcp__granola__get_note",
 ]
 
 
@@ -137,6 +151,32 @@ source_agents = {
     f"{slug}-digest": _source_subagent(slug, label, app_filter, rule)
     for slug, label, app_filter, rule in SOURCES
 }
+
+
+def _granola_subagent() -> AgentDefinition:
+    user_hint = f" The user is {DIGEST_USER_EMAIL}." if DIGEST_USER_EMAIL else ""
+    return AgentDefinition(
+        description=(
+            f"Harvest the user's last-{TIMEFRAME_HOURS}h Granola meeting notes via the "
+            f"first-party Granola MCP (not Glean) and write a digest file. Granola only."
+        ),
+        prompt=(
+            "You harvest ONLY the Granola source, reached through the Granola MCP server "
+            "(`mcp__granola__list_notes` then `mcp__granola__get_note`) — NOT Glean. Use "
+            "the `source-digest` skill (granola branch). Call list_notes with "
+            "`created_after` set to the start of the timeframe, page via `cursor` while "
+            "`hasMore`, and use get_note for details/attendees. Keep only meetings the "
+            f"user attended / was invited to.{user_hint} Timeframe: last {TIMEFRAME_HOURS} "
+            "hours. Write the digest to memory/granola-<timestamp>.md and return only the "
+            "file path."
+        ),
+        tools=[*GRANOLA_TOOLS, "Write"],
+        skills=["source-digest"],
+        model="claude-sonnet-4-6",
+    )
+
+
+source_agents["granola-digest"] = _granola_subagent()
 
 
 # --- profile-curator sub-agent (durable user-profile facts) ---
@@ -193,11 +233,25 @@ options = ClaudeAgentOptions(
     skills=["source-digest", "user-profile"],
     mcp_servers=mcp_servers,
     agents={**source_agents, "profile-curator": profile_curator},
+    # Approval is session-global: a subagent's AgentDefinition.tools only scopes its
+    # *visibility*, it does NOT auto-approve. So allowed_tools must be the UNION of
+    # every tool any agent (orchestrator + all subagents) calls — otherwise subagent
+    # calls prompt (interactive) or are denied (true headless: dontAsk / no TTY).
+    # Skill(source-digest)/Skill(user-profile) are auto-added by skills=[...].
     allowed_tools=[
-        "Task",  # auto-approve delegation to subagents
+        "Task",  # delegation to subagents
         "Read",
         "Glob",
-        "mcp__graphiti__add_memory",  # orchestrator ingests the digest files
+        "Write",  # subagents write digest files + user-profile.md
+        "mcp__graphiti__add_memory",       # orchestrator ingest + profile-curator
+        "mcp__graphiti__search_nodes",     # profile-curator dedup
+        "mcp__graphiti__get_episodes",     # profile-curator dedup
+        "mcp__glean__search",              # source subagents
+        "mcp__glean__read_document",
+        "mcp__glean__chat",
+        "mcp__glean__meeting_lookup",
+        "mcp__granola__list_notes",        # granola subagent (first-party Granola MCP)
+        "mcp__granola__get_note",
     ],
     cwd=str(PROJECT_ROOT),
 )

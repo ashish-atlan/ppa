@@ -6,8 +6,11 @@ description: Harvest the current user's relevant artifacts from ONE source syste
 # source-digest
 
 Harvest the **current user's relevant** artifacts from **exactly one** source system over a
-timeframe and write them to a file. Sources are reached **only through the Glean MCP
-server** — never a direct source API. Every Glean call must make the source explicit.
+timeframe and write them to a file. Most sources are reached **through the Glean MCP
+server** — never a direct source API. **Exception: `granola`** — Glean does not index Granola
+for this user, so the granola source is reached through the **first-party Granola MCP server**
+(`mcp__granola__list_notes` → `mcp__granola__get_note`), not Glean. For Glean sources, every
+Glean call must make the source explicit.
 
 Operate on the **one** source named in the task. Do not mix sources. If no source is given,
 ask for one — do not guess.
@@ -33,13 +36,19 @@ ask for one — do not guess.
    | slack            | `app:Slack`              | threads where the user is tagged directly/indirectly or participated| `search` → `read_document` |
    | gmail            | `app:Gmail`              | user is in **to / cc / bcc** (use `to:`/`cc:` with the user email)  | `search` → `read_document` |
    | gong             | `app:Gong`               | user was **invited to** the call / meeting                          | `meeting_lookup`, `search` |
-   | granola          | `app:Granola`            | user was **invited to** the meeting                                 | `meeting_lookup`, `search` |
+   | granola          | **Granola MCP** (not Glean) | user **attended / was invited to** the meeting                   | `mcp__granola__list_notes` → `mcp__granola__get_note` |
    | linear           | `app:Linear`             | issues assigned to / created by / mentioning / subscribed-to user   | `search` → `read_document` |
    | google calendar  | `app:"Google Calendar"`  | events where the user is an **attendee / invitee**                  | `meeting_lookup`, `list` |
 
-   Tools: `mcp__glean__search` for discovery, `mcp__glean__read_document` for full content,
-   `mcp__glean__meeting_lookup` for gong/granola/calendar, `mcp__glean__chat` only to
+   Tools (Glean sources): `mcp__glean__search` for discovery, `mcp__glean__read_document` for
+   full content, `mcp__glean__meeting_lookup` for gong/calendar, `mcp__glean__chat` only to
    synthesize across several results. Refine with extra filters rather than broadening.
+
+   **Granola branch (no Glean):** call `mcp__granola__list_notes` with `created_after` set to the
+   timeframe start; page with the returned `cursor` while `hasMore` is true. For each candidate
+   meeting call `mcp__granola__get_note(note_id, include_transcript=False)` to read the summary +
+   `attendees`, and keep only meetings the user attended / was invited to. (Granola only returns
+   notes that already have an AI summary + transcript.)
 
 3. **Apply the user-relevance rule** for the source (table above). Keep only artifacts that
    actually involve the user. **No fabrication** — if nothing matches, record `none found`.
