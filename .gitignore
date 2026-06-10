@@ -10,3 +10,19 @@ memory/*.md
 # Runtime briefing outputs (agent-sentry; may contain personal/internal content).
 briefings/*.md
 briefings/cron.log
+
+# Cron + agent run logs (stdout/stderr + captured agent transcripts; may contain personal
+# content). The directories themselves are tracked via .gitkeep so cron's `>>` redirects work.
+logs/**/*.log
+logs/**/*.transcript.txt
+!logs/**/.gitkeep
+
+# HITL feedback loop runtime state (Slack message-id <-> briefing correlation + dedup ledger).
+briefings/.slack-sent.jsonl
+briefings/.slack-processed.json
+
+# UI runtime (start-ui.sh / stop-ui.sh).
+.ui.pids
+.ui-logs/
+# Generated from .env at startup; holds the SENTRY_API_KEY served to the local UI. Never commit.
+frontend/config.js

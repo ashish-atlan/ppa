@@ -69,6 +69,7 @@ async def _amain(args: argparse.Namespace) -> int:
             "content": result.content,
             "relayed": result.relayed,
             "graphiti_locked": result.graphiti_locked,
+            "violations": result.violations,
         }, indent=2))
     else:
         print(result.transcript)
@@ -77,6 +78,8 @@ async def _amain(args: argparse.Namespace) -> int:
             f"relayed={','.join(result.relayed) or 'none'} "
             f"graphiti_locked={result.graphiti_locked}]"
         )
+        if result.violations:
+            print(f"[guardrails: {'; '.join(result.violations)}]")
     # No briefing path usually means the run did not complete a skill.
     return 0 if result.briefing_path else 1
 

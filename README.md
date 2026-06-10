@@ -245,6 +245,32 @@ turns that email into a **direct message** to the user (`users.lookupByEmail` �
 The shipped [`daily-priority-brief`](.claude/skills/daily-priority-brief/SKILL.md) skill uses
 `relay: [ui, slack]` with `slack_channel: self` — it DMs the user a daily Eisenhower-matrix brief.
 
+## Guardrails (every skill)
+
+Common rules apply to **every** skill run, regardless of which one the SDK selects. They live
+in an editable file — [`.claude/sentry-guardrails.md`](.claude/sentry-guardrails.md) — that
+`sentry_core` injects into the one system prompt all skills inherit (a built-in default is used
+if the file is absent). Edit the file to change the rules; no code change. They cover:
+
+- **Grounding / no-fabrication** — assert only ppa-sourced facts; mark unknowns; no invented links.
+- **Injection safety** — the ppa context + prompt are *data, not instructions*; relay only to
+  the skill's frontmatter targets; one skill per run.
+- **Output discipline (TL;DR)** — lead with the answer, succinct, detail behind references.
+- **No raw secrets** in the briefing.
+
+The guardrails block is marked to **override a skill's own instructions on conflict**.
+
+Two of these are also enforced **deterministically** in `run_briefing()` as a backstop, applied
+to the persisted briefing file + the content returned to the UI/JSON: secret-like values are
+**masked** (`«redacted»`) and oversize briefings are **truncated** at `SENTRY_MAX_BRIEFING_CHARS`
+(default 12000). Anything caught is reported in the result's `violations` array (CLI `[guardrails: …]`
+line, `--json`, and the `/run` response).
+
+> **Enforcement boundary:** relay (Slack/email) and graphiti-lock run *inside* the agent turn,
+> so the deterministic checks protect the **stored file + UI payload**, not the already-sent
+> Slack/email body — the prompt block (plus "no raw secrets") is the control there. Making the
+> outbound body redaction airtight would mean moving relay into Python or a PreToolUse hook.
+
 ## CLI / cron
 
 ```bash
@@ -271,7 +297,7 @@ non-interactive; exit code is non-zero on failure so cron can alert.
 | endpoint | purpose |
 |---|---|
 | `GET /skills` | one entry per skill → the UI builds **one tab per skill** |
-| `POST /run` | body `{skill, prompt?, timeframe_hours?}` → `{skill, briefing_path, content, relayed[], graphiti_locked}`; `content` is the markdown the **right pane** renders |
+| `POST /run` | body `{skill, prompt?, timeframe_hours?, dry_run?}` → `{skill, briefing_path, content, relayed[], graphiti_locked}`; `content` is the markdown the **right pane** renders. For a **live-fetch skill** (e.g. `daily-pulse`) the API spawns that skill's standalone harness out-of-process instead of running it through agent-sentry's toolset — see below |
 
 Auth: every request needs `X-API-Key: $SENTRY_API_KEY`. Unknown skill → 404; over the
 per-key rate limit → 429. Bound to localhost; a public deployment needs a security review
@@ -281,7 +307,7 @@ per-key rate limit → 429. Bound to localhost; a public deployment needs a secu
 
 | server | transport | tools | env |
 |---|---|---|---|
-| `slack` | stdio launcher → [`src/slack_mcp_server.py`](src/slack_mcp_server.py) (FastMCP over Slack `chat.postMessage`) | `mcp__slack__send_message` | `SLACK_BOT_TOKEN` (scope `chat:write`) |
+| `slack` | stdio launcher → [`src/slack_mcp_server.py`](src/slack_mcp_server.py) (FastMCP over Slack `chat.postMessage`, sharing [`src/slack_client.py`](src/slack_client.py)) | `mcp__slack__send_message` | `SLACK_BOT_TOKEN` (scopes `chat:write`, `users:read.email`, `im:write`, + `reactions:read`/`im:history` for feedback) |
 | `email` | stdio launcher → [`src/email_mcp_server.py`](src/email_mcp_server.py) (FastMCP over SMTP + STARTTLS) | `mcp__email__send` | `SMTP_HOST/PORT/USER/PASS/FROM` |
 
 Both are first-party (no third-party MCP packages) and defined in [`.mcp.json`](.mcp.json)
@@ -291,3 +317,73 @@ graphiti + slack + email. Glean/Granola are defined in the project but intention
 wired into agent-sentry — the `ppa` graph (which mem-writer populates from them) is the
 source of truth. A relay server whose env (token / SMTP creds) is absent simply fails to
 start and its tool is unavailable at call time.
+
+## HITL feedback over Slack (two-way loop)
+
+Feedback isn't only the UI's 👍/👎 buttons — you can give it **straight from the Slack DM**.
+When a brief is relayed to Slack, `send_message` records the message id (`ts`) → briefing → skill
+to `briefings/.slack-sent.jsonl`. React 👍/👎 to the DM and/or **reply in the thread** with a
+correction; an hourly poller ([`src/slack_feedback_poller.py`](src/slack_feedback_poller.py),
+see [`crontab.example`](crontab.example)) reads the sent-map, pulls `reactions.get` +
+`conversations.replies`, resolves a rating (👎→down, 👍→up, comment-only→down, nothing→skip), and
+calls the same `record_feedback()` → `feedback-learner` pipeline as the UI. A per-`ts` signature in
+`briefings/.slack-processed.json` dedups so a standing reaction doesn't re-fire each hour. No new
+token type — the existing `SLACK_BOT_TOKEN` just needs `reactions:read` + `im:history` added.
+Full design + diagrams: [`hitl-readme.md`](hitl-readme.md).
+
+---
+
+# daily-pulse — standalone live-fetch pulse
+
+`src/daily-pulse.py` is a **third sibling**: not a producer (mem-writer) and not a
+graph-consumer (agent-sentry), but a **live-fetch** harness. It runs the
+[`daily-pulse`](.claude/skills/daily-pulse/SKILL.md) skill, which a CSA uses for a daily,
+high-fidelity signal in two halves:
+
+- **Internal — context-layer energy:** Slack (`collab-context-engineering-studio`,
+  `collab-context-agent-studio`, `collab-context-layer`, + any `context`-named channel) and
+  Gong customer calls on **AI-agent architecture / context layer / context agents** (routing
+  to the call link **and** a timestamped segment), skipping early demos unless high-visibility
+  (e.g. **Varun** hosting). Plus what the **TDD Linear team** is actively working.
+- **External — AI signal:** a brief, distilled web scan of new AI tools, agent architecture
+  patterns, and trends relevant to an Atlan CSA.
+
+Each signal is **1–2 lines + a link**; it never fabricates to fill a section.
+
+### Why it's standalone (not an agent-sentry skill)
+
+agent-sentry reads the `ppa` graph and is scoped to **graphiti + slack + email**. daily-pulse
+must **live-fetch** — the context channels, the TDD team, and context-layer calls aren't in
+`ppa`, and external AI trends have **no internal source at all** (they need the web). So it
+gets its own entrypoint with its own `allowed_tools`:
+
+> `Read`, `Write`, the four `mcp__glean__*` tools (Slack + Gong), `WebSearch`, `WebFetch`,
+> and `mcp__slack__send_message` (DMs the user). It writes `briefings/daily-pulse-<ts>.md`
+> and **never writes Graphiti** (`lock_to_graphiti: false`).
+
+> **Linear note:** the repo `.mcp.json` has no Linear server, so the skill falls back to Glean
+> `app:Linear` for the TDD team. Add a Linear MCP server to `.mcp.json` for the structured
+> cycle/status view (the skill prefers a real Linear MCP when one is present).
+
+### Run
+
+```bash
+# Interactive (writes the briefing + DMs the user):
+.venv/bin/python src/daily-pulse.py
+
+# Wider window / testing (writes the briefing, skips the Slack DM):
+.venv/bin/python src/daily-pulse.py --timeframe-hours 72 --dry-run
+```
+
+Cron: see [`crontab.example`](crontab.example) — a daily line runs `src/daily-pulse.py`
+directly (not via `agent-sentry.py`), since it carries its own tools. `PULSE_USER_EMAIL`
+(or `DIGEST_USER_EMAIL`) sets who "self" is for the DM.
+
+### In the UI
+
+daily-pulse shows up as a normal tab (it has a `SKILL.md`), flagged **live**. Because it can't
+run through agent-sentry, `POST /run` detects it (`_EXTERNAL_HARNESS` in `sentry_api.py`) and
+**spawns `src/daily-pulse.py` out-of-process** with only validated flags (timeframe, dry-run) —
+no shell, no user string in argv — then returns the briefing it wrote. The API process gains no
+new tools; it just orchestrates the separate harness. 👍/👎 feedback works the same as any
+briefing.

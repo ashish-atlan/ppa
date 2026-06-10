@@ -1,0 +1,53 @@
+[
+  {"type":"cameraUpdate","width":1600,"height":1200,"x":-20,"y":-20},
+  {"type":"text","id":"title","x":420,"y":2,"text":"ppa - system architecture","fontSize":30,"strokeColor":"#1e1e1e"},
+
+  {"type":"rectangle","id":"z_ingest","x":20,"y":110,"width":450,"height":340,"roundness":{"type":3},"backgroundColor":"#dbe4ff","fillStyle":"solid","strokeColor":"#4a9eed","strokeWidth":1,"opacity":30},
+  {"type":"text","id":"z_ingest_l","x":36,"y":118,"text":"INGEST  (write to graph)","fontSize":16,"strokeColor":"#2563eb"},
+  {"type":"rectangle","id":"z_store","x":490,"y":110,"width":250,"height":470,"roundness":{"type":3},"backgroundColor":"#d3f9d8","fillStyle":"solid","strokeColor":"#22c55e","strokeWidth":1,"opacity":30},
+  {"type":"text","id":"z_store_l","x":506,"y":118,"text":"STORE  (source of truth)","fontSize":16,"strokeColor":"#15803d"},
+  {"type":"rectangle","id":"z_serve","x":760,"y":110,"width":470,"height":620,"roundness":{"type":3},"backgroundColor":"#e5dbff","fillStyle":"solid","strokeColor":"#8b5cf6","strokeWidth":1,"opacity":30},
+  {"type":"text","id":"z_serve_l","x":776,"y":118,"text":"SERVE  (read graph / live-fetch -> relay)","fontSize":16,"strokeColor":"#6d28d9"},
+
+  {"type":"rectangle","id":"t_cron","x":240,"y":48,"width":170,"height":44,"roundness":{"type":3},"backgroundColor":"#fff3bf","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"cron (crontab)","fontSize":16}},
+  {"type":"rectangle","id":"t_cli","x":820,"y":48,"width":190,"height":44,"roundness":{"type":3},"backgroundColor":"#fff3bf","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"CLI  --skill","fontSize":16}},
+  {"type":"rectangle","id":"t_ui","x":1030,"y":48,"width":190,"height":44,"roundness":{"type":3},"backgroundColor":"#fff3bf","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"HTTP API + UI","fontSize":16}},
+
+  {"type":"rectangle","id":"glean","x":40,"y":175,"width":190,"height":64,"roundness":{"type":3},"backgroundColor":"#ffd8a8","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"Glean MCP\nslack gmail gong linear gcal","fontSize":14}},
+  {"type":"rectangle","id":"granola","x":40,"y":300,"width":190,"height":60,"roundness":{"type":3},"backgroundColor":"#ffd8a8","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"Granola MCP\n(first-party)","fontSize":14}},
+  {"type":"rectangle","id":"memw","x":270,"y":195,"width":180,"height":175,"roundness":{"type":3},"backgroundColor":"#d0bfff","fillStyle":"solid","strokeColor":"#8b5cf6","label":{"text":"mem-writer\n(PRODUCER)\n\n6 parallel\nsource subagents\n+ profile-curator","fontSize":15}},
+  {"type":"arrow","id":"a_gl_mw","x":230,"y":205,"width":40,"height":45,"points":[[0,0],[40,45]],"strokeColor":"#f59e0b","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"app:<source>","fontSize":13}},
+  {"type":"arrow","id":"a_gr_mw","x":230,"y":325,"width":40,"height":-15,"points":[[0,0],[40,-15]],"strokeColor":"#f59e0b","strokeWidth":2,"endArrowhead":"arrow"},
+
+  {"type":"rectangle","id":"graph","x":510,"y":170,"width":210,"height":135,"roundness":{"type":3},"backgroundColor":"#b2f2bb","fillStyle":"solid","strokeColor":"#22c55e","label":{"text":"Graphiti / Neo4j\n(local)\n\ngroup_id: ppa","fontSize":16}},
+  {"type":"rectangle","id":"mem","x":510,"y":355,"width":210,"height":120,"roundness":{"type":3},"backgroundColor":"#c3fae8","fillStyle":"solid","strokeColor":"#0c8599","label":{"text":"memory/\nuser-profile.md\nskill-preferences.md\n<source>-<ts>.md","fontSize":14}},
+  {"type":"arrow","id":"a_mw_g","x":450,"y":255,"width":60,"height":-20,"points":[[0,0],[60,-20]],"strokeColor":"#22c55e","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"add_memory","fontSize":14}},
+  {"type":"arrow","id":"a_mw_m","x":450,"y":340,"width":60,"height":40,"points":[[0,0],[60,40]],"strokeColor":"#0c8599","strokeWidth":1,"endArrowhead":"arrow","label":{"text":"digests","fontSize":13}},
+
+  {"type":"rectangle","id":"sentry","x":790,"y":175,"width":210,"height":155,"roundness":{"type":3},"backgroundColor":"#d0bfff","fillStyle":"solid","strokeColor":"#8b5cf6","label":{"text":"agent-sentry\n(CONSUMER)\n\nrun_briefing()\nskill-driven\nNO router","fontSize":15}},
+  {"type":"rectangle","id":"pulse","x":1025,"y":175,"width":190,"height":155,"roundness":{"type":3},"backgroundColor":"#d0bfff","fillStyle":"solid","strokeColor":"#8b5cf6","label":{"text":"daily-pulse\n(LIVE-FETCH)\n\nGlean + Web\nNOT the graph","fontSize":15}},
+  {"type":"arrow","id":"a_g_s","x":720,"y":230,"width":70,"height":-5,"points":[[0,0],[70,-5]],"strokeColor":"#22c55e","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"read (Step 0)","fontSize":14}},
+  {"type":"arrow","id":"a_s_g","x":790,"y":312,"width":-70,"height":-8,"points":[[0,0],[-70,-8]],"strokeColor":"#22c55e","strokeWidth":2,"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"lock (opt)","fontSize":13}},
+  {"type":"arrow","id":"a_m_s","x":720,"y":400,"width":70,"height":-95,"points":[[0,0],[70,-95]],"strokeColor":"#0c8599","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"prefs (Step 0b)","fontSize":13}},
+
+  {"type":"rectangle","id":"dpsrc","x":1025,"y":370,"width":190,"height":56,"roundness":{"type":3},"backgroundColor":"#ffd8a8","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"Glean (slack/gong) + Web","fontSize":13}},
+  {"type":"arrow","id":"a_dp","x":1120,"y":370,"width":0,"height":-40,"points":[[0,0],[0,-40]],"strokeColor":"#f59e0b","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"live-fetch","fontSize":13}},
+
+  {"type":"rectangle","id":"slack","x":790,"y":480,"width":130,"height":56,"roundness":{"type":3},"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed","label":{"text":"Slack DM","fontSize":16}},
+  {"type":"rectangle","id":"email","x":935,"y":480,"width":110,"height":56,"roundness":{"type":3},"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed","label":{"text":"Email","fontSize":16}},
+  {"type":"rectangle","id":"ui","x":1060,"y":480,"width":110,"height":56,"roundness":{"type":3},"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed","label":{"text":"UI","fontSize":16}},
+  {"type":"arrow","id":"a_s_sl","x":855,"y":330,"width":0,"height":150,"points":[[0,0],[0,150]],"strokeColor":"#8b5cf6","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"relay per frontmatter","fontSize":13}},
+  {"type":"arrow","id":"a_s_em","x":920,"y":330,"width":70,"height":150,"points":[[0,0],[70,150]],"strokeColor":"#8b5cf6","strokeWidth":1,"endArrowhead":"arrow"},
+  {"type":"arrow","id":"a_s_ui","x":960,"y":330,"width":155,"height":150,"points":[[0,0],[155,150]],"strokeColor":"#8b5cf6","strokeWidth":1,"endArrowhead":"arrow"},
+  {"type":"arrow","id":"a_dp_sl","x":1040,"y":426,"width":-120,"height":54,"points":[[0,0],[-120,54]],"strokeColor":"#8b5cf6","strokeWidth":1,"endArrowhead":"arrow","label":{"text":"DM","fontSize":13}},
+
+  {"type":"rectangle","id":"hitl","x":860,"y":590,"width":350,"height":76,"roundness":{"type":3},"backgroundColor":"#ffd8a8","fillStyle":"solid","strokeColor":"#f59e0b","label":{"text":"HITL feedback loop\npoller (hourly) + feedback-learner\n-> see diagram 2","fontSize":15}},
+  {"type":"arrow","id":"a_sl_h","x":855,"y":536,"width":120,"height":54,"points":[[0,0],[120,54]],"strokeColor":"#ef4444","strokeWidth":2,"endArrowhead":"arrow","label":{"text":"thumbs / reply","fontSize":13}},
+  {"type":"arrow","id":"a_h_m","x":860,"y":628,"width":-250,"height":-153,"points":[[0,0],[-250,-153]],"strokeColor":"#ef4444","strokeWidth":2,"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"writes skill-preferences","fontSize":13}},
+
+  {"type":"arrow","id":"a_tc_mw","x":325,"y":92,"width":20,"height":103,"points":[[0,0],[20,103]],"strokeColor":"#757575","strokeWidth":1,"endArrowhead":"arrow"},
+  {"type":"arrow","id":"a_tcli_s","x":900,"y":92,"width":-10,"height":83,"points":[[0,0],[-10,83]],"strokeColor":"#757575","strokeWidth":1,"endArrowhead":"arrow"},
+  {"type":"arrow","id":"a_tui_s","x":1110,"y":92,"width":-40,"height":83,"points":[[0,0],[-40,83]],"strokeColor":"#757575","strokeWidth":1,"endArrowhead":"arrow"},
+
+  {"type":"text","id":"note","x":40,"y":700,"text":"All MCP servers defined in .mcp.json | model: claude-sonnet-4-6 via Claude Agent SDK | one shared graph group 'ppa'","fontSize":14,"strokeColor":"#757575"}
+]

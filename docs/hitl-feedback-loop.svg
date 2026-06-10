@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="16 -22 1083 638" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+  <marker id="ah-0c8599" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0c8599"/></marker>
+  <marker id="ah-22c55e" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#22c55e"/></marker>
+  <marker id="ah-4a9eed" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#4a9eed"/></marker>
+  <marker id="ah-8b5cf6" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#8b5cf6"/></marker>
+  <marker id="ah-ef4444" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#ef4444"/></marker>
+  <marker id="ah-f59e0b" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#f59e0b"/></marker>
+  </defs>
+  <rect x="16" y="-22" width="1083" height="638" fill="white"/>
+  <text x="340" y="30.0" font-size="28" fill="#1e1e1e" font-family="Segoe UI, Helvetica, Arial, sans-serif">ppa - HITL feedback / self-improvement loop</text>
+  <rect x="40" y="70" width="200" height="86" rx="12" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="140.0" y="99.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">agent-sentry</text>
+  <text x="140.0" y="117.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">run_briefing()</text>
+  <text x="140.0" y="135.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">-&gt; briefings/*.md</text>
+  <rect x="300" y="70" width="215" height="86" rx="12" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/>
+  <text x="407.5" y="100.4" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Slack DM</text>
+  <text x="407.5" y="117.2" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">slack_mcp_server</text>
+  <text x="407.5" y="134.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">-&gt; .slack-sent.jsonl</text>
+  <ellipse cx="670.0" cy="114.0" rx="95.0" ry="48.0" fill="#fff3bf" stroke="#f59e0b" stroke-width="2"/>
+  <text x="670.0" y="100.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">User</text>
+  <text x="670.0" y="118.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">reacts up/down</text>
+  <text x="670.0" y="136.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">+ thread reply</text>
+  <rect x="820" y="52" width="255" height="124" rx="12" fill="#ffd8a8" stroke="#f59e0b" stroke-width="2"/>
+  <text x="947.5" y="84.6" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">slack_feedback_poller</text>
+  <text x="947.5" y="101.4" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">(hourly cron)</text>
+  <text x="947.5" y="118.2" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">reactions.get +</text>
+  <text x="947.5" y="135.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">conversations.replies</text>
+  <text x="947.5" y="151.8" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">dedup: .slack-processed.json</text>
+  <path d="M 240.0,113.0 L 300.0,113.0" fill="none" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ah-8b5cf6)"/>
+  <rect x="237.4" y="103.2" width="65.2" height="18.2" fill="white" opacity="0.85"/>
+  <text x="270.0" y="117.5" font-size="13" fill="#8b5cf6" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">DM brief</text>
+  <path d="M 515.0,113.0 L 575.0,113.0" fill="none" stroke="#4a9eed" stroke-width="2" marker-end="url(#ah-4a9eed)"/>
+  <rect x="516.0" y="103.2" width="58.1" height="18.2" fill="white" opacity="0.85"/>
+  <text x="545.0" y="117.5" font-size="13" fill="#4a9eed" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">deliver</text>
+  <path d="M 765.0,113.0 L 820.0,113.0" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#ah-f59e0b)"/>
+  <rect x="770.6" y="103.2" width="43.8" height="18.2" fill="white" opacity="0.85"/>
+  <text x="792.5" y="117.5" font-size="13" fill="#f59e0b" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">react</text>
+  <rect x="820" y="300" width="255" height="72" rx="12" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="947.5" y="331.8" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">record_feedback()</text>
+  <text x="947.5" y="348.6" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">skill, path, rating, comment</text>
+  <rect x="820" y="430" width="255" height="58" rx="12" fill="#a5d8ff" stroke="#4a9eed" stroke-width="2"/>
+  <text x="947.5" y="463.5" font-size="15" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">UI: POST /feedback</text>
+  <path d="M 947.0,176.0 L 947.0,300.0" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#ah-f59e0b)"/>
+  <rect x="839.3" y="228.2" width="215.4" height="18.2" fill="white" opacity="0.85"/>
+  <text x="947.0" y="242.6" font-size="13" fill="#f59e0b" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">resolve rating (skip if none)</text>
+  <path d="M 947.0,430.0 L 947.0,372.0" fill="none" stroke="#4a9eed" stroke-width="2" marker-end="url(#ah-4a9eed)"/>
+  <rect x="918.0" y="391.2" width="58.1" height="18.2" fill="white" opacity="0.85"/>
+  <text x="947.0" y="405.6" font-size="13" fill="#4a9eed" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">UI path</text>
+  <rect x="470" y="292" width="250" height="92" rx="12" fill="#d0bfff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="595.0" y="325.4" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">feedback-learner skill</text>
+  <text x="595.0" y="342.2" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">re-derive prefs from</text>
+  <text x="595.0" y="359.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">WHOLE feedback history</text>
+  <path d="M 820.0,336.0 L 720.0,336.0" fill="none" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ah-8b5cf6)"/>
+  <rect x="733.8" y="326.2" width="72.4" height="18.2" fill="white" opacity="0.85"/>
+  <text x="770.0" y="340.6" font-size="13" fill="#8b5cf6" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">run skill</text>
+  <rect x="190" y="292" width="190" height="92" rx="12" fill="#b2f2bb" stroke="#22c55e" stroke-width="2"/>
+  <text x="285.0" y="325.4" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">Graphiti (ppa)</text>
+  <text x="285.0" y="342.2" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">feedback:</text>
+  <text x="285.0" y="359.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">skill-preferences:</text>
+  <rect x="190" y="430" width="190" height="70" rx="12" fill="#c3fae8" stroke="#0c8599" stroke-width="2"/>
+  <text x="285.0" y="460.8" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">memory/</text>
+  <text x="285.0" y="477.6" font-size="14" fill="#1e1e1e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">skill-preferences.md</text>
+  <path d="M 470.0,338.0 L 380.0,338.0" fill="none" stroke="#22c55e" stroke-width="2" marker-end="url(#ah-22c55e)"/>
+  <rect x="356.6" y="328.2" width="136.7" height="18.2" fill="white" opacity="0.85"/>
+  <text x="425.0" y="342.6" font-size="13" fill="#22c55e" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">store raw + merged</text>
+  <path d="M 540.0,384.0 L 285.0,432.0" fill="none" stroke="#0c8599" stroke-width="2" marker-end="url(#ah-0c8599)"/>
+  <rect x="351.3" y="398.2" width="122.4" height="18.2" fill="white" opacity="0.85"/>
+  <text x="412.5" y="412.6" font-size="13" fill="#0c8599" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">write merged set</text>
+  <path d="M 260.0,292.0 L 130.0,156.0" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="7,5" marker-end="url(#ah-ef4444)"/>
+  <rect x="98.0" y="214.2" width="193.9" height="18.2" fill="white" opacity="0.85"/>
+  <text x="195.0" y="228.6" font-size="13" fill="#ef4444" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif">applied NEXT run (Step 0b)</text>
+  <text x="190" y="559.0" font-size="14" fill="#757575" font-family="Segoe UI, Helvetica, Arial, sans-serif">Additive by default - supersede only on direct contradiction, escalate on recurrence.</text>
+  <text x="190" y="589.0" font-size="14" fill="#757575" font-family="Segoe UI, Helvetica, Arial, sans-serif">Two feedback sources (Slack reactions/replies + UI) converge on one record_feedback() pipeline.</text>
+</svg>

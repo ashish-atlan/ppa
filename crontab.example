@@ -9,7 +9,29 @@
 # The script loads the repo .env itself, so secrets need not be exported here.
 
 # Daily priority brief at 08:00 local time (DMs the user via Slack + locks into ppa).
-0 8 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill daily-priority-brief >> briefings/cron.log 2>&1
+0 11 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill daily-priority-brief >> logs/briefings/cron.log 2>&1
 
 # Same brief on Monday with a wider lookback window (last 72h over the weekend).
-30 7 * * 1  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill daily-priority-brief --timeframe-hours 72 >> briefings/cron.log 2>&1
+30 11 * * 1  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill meeting-prep --timeframe-hours 72 >> logs/briefings/cron.log 2>&1
+
+# mem-writer — build the cross-source digest + update the durable profile, twice daily.
+# Times are IST (host TZ is Asia/Kolkata; cron uses local time — no UTC conversion needed).
+0 10 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/mem-writer.py >> logs/memwriter/cron.log 2>&1
+0 17 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/mem-writer.py >> logs/memwriter/cron.log 2>&1
+
+# Slack feedback poller — hourly: pull reactions/replies on relayed briefs into feedback-learner.
+# Inbound half of the HITL loop; reads briefings/.slack-sent.jsonl (written when a brief is DM'd)
+# and routes feedback through record_feedback. Needs bot scopes reactions:read + im:history.
+30 * * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/slack_feedback_poller.py >> logs/briefings/feedback-poll.log 2>&1
+
+# Preference reconcile — every 3h: push any pending-graphiti feedback/preferences (written to the
+# local files while Graphiti was down, e.g. budget-exceeded) into Graphiti, then flip them to
+# synced. Safety net for quiet periods; feedback-learner also reconciles at the start of each
+# normal feedback run. A no-op when nothing is pending or Graphiti is still unavailable. Tune the
+# cadence as needed — each run spins one agent.
+0 */3 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/agent-sentry.py --skill feedback-learner --prompt "RECONCILE: sync any pending-graphiti feedback and preferences from the local files into Graphiti. Do not learn new preferences." >> logs/briefings/feedback-poll.log 2>&1
+
+# daily-pulse — standalone CSA pulse (live-fetch via Glean + web; DMs the user; no Graphiti).
+# It is NOT an agent-sentry skill — it has its own entrypoint + tool grants. Independent of
+# mem-writer (it live-fetches, doesn't read the ppa graph), so timing is free. 09:00 IST.
+0 9 * * *  cd /Users/ashish.desai/Desktop/MyGIT/ppa && .venv/bin/python src/daily-pulse.py >> logs/briefings/cron.log 2>&1
